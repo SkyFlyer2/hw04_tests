@@ -32,6 +32,7 @@ class PostCreateFormTests(TestCase):
 
     def test_create_post(self):
         """Создание записи посредством валидной формы"""
+
         posts_count = Post.objects.count()
         form_data = {
             'group': self.group.id,

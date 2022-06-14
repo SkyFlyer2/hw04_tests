@@ -18,7 +18,7 @@ def group_posts(request, slug):
     """вывод записей одной из групп. """
 
     group = get_object_or_404(Group, slug=slug)
-    posts = group.posts.select_related('group')
+    posts = group.posts.select_related('author', 'group')
     page_obj = page_list(posts, request)
     return render(request, 'posts/group_list.html', {'group': group,
                                                      'page_obj': page_obj})
@@ -28,7 +28,6 @@ def profile(request, username):
     """вывод списка всех записей пользователя. """
 
     user = get_object_or_404(User, username=username)
-    # Здесь код запроса к модели и создание словаря контекста
     post_list = user.posts.select_related('author')
     page_obj = page_list(post_list, request)
     return render(request, 'posts/profile.html', {
@@ -41,9 +40,11 @@ def post_detail(request, post_id):
     """подробная информация о записи. """
 
     post = get_object_or_404(Post, pk=post_id)
-    return render(request, 'posts/post_detail.html', {
-        'post_detail': post
-    })
+    return render(
+        request,
+        'posts/post_detail.html',
+        {'post_detail': post}
+    )
 
 
 @login_required
@@ -73,8 +74,11 @@ def post_edit(request, post_id):
             form.save()
             return redirect('posts:post_detail', post_id)
     return render(
-        request, 'posts/create_post.html', {
+        request,
+        'posts/create_post.html',
+        {
             'form': form,
             'is_edit': True,
             'post_id': post_id
-        })
+        }
+    )
