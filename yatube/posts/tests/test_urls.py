@@ -7,16 +7,10 @@ User = get_user_model()
 
 class StaticURLTests(TestCase):
     def setUp(self):
-        # Устанавливаем данные для тестирования
-        # Создаём экземпляр клиента. Он неавторизован.
         self.guest_client = Client()
 
     def test_homepage(self):
-        # Создаем экземпляр клиента
-        guest_client = Client()
-        # Делаем запрос к главной странице и проверяем статус
-        response = guest_client.get('/')
-        # Утверждаем, что для прохождения теста код должен быть равен 200
+        response = self.guest_client.get('/')
         self.assertEqual(response.status_code, 200)
 
 
@@ -24,13 +18,8 @@ class PostURLTests(TestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        # Создадим запись в БД для проверки доступности адреса task/test-slug/
+
         cls.user = User.objects.create_user(username='testuser')
-#        cls.authorized_client = Client()
-        # Авторизуем пользователя
-#        cls.authorized_client.force_login(cls.user)
-        # Создаем неавторизованного пользователя
-#        cls.guest_client = Client()
         cls.group = Group.objects.create(
             title='Тестовая группа',
             slug='test_slug',
@@ -41,7 +30,6 @@ class PostURLTests(TestCase):
             text='Тестовый текст, который не должен быть слишком коротким',
             group=cls.group
         )
-
         cls.guest_user_urls = {
             '/': 'posts/index.html',
             '/group/test_slug/': 'posts/group_list.html',
@@ -54,13 +42,8 @@ class PostURLTests(TestCase):
         }
 
     def setUp(self):
-        # Создаем неавторизованный клиент
         self.guest_client = Client()
-        # Создаем пользователя
-#        self.user = User.objects.create_user(username='testuser')
-        # Создаем второй клиент
         self.authorized_client = Client()
-        # Авторизуем пользователя
         self.authorized_client.force_login(self.user)
 
     def test_home_url_exists_at_desired_location(self):
@@ -93,7 +76,7 @@ class PostURLTests(TestCase):
         response = self.guest_client.get('/unexisting_page/')
         self.assertEqual(response.status_code, 404)
 
-# Проверяем доступность страниц для авторизованного пользователя
+# Серия тестов для авторизованного пользователя
     def test_post_edit_url_exists_at_desired_location(self):
         """Страница /posts/<post_id>/edit доступна только автору."""
 
@@ -114,7 +97,7 @@ class PostURLTests(TestCase):
 
 # проверка шаблонов по адресам
     def test_urls_guest_user_template(self):
-        """URL-адрес использует соответствующий шаблон."""
+        """проверка шаблонов для гостя."""
 
         for address, template in self.guest_user_urls.items():
             with self.subTest(address=address):
@@ -122,7 +105,7 @@ class PostURLTests(TestCase):
                 self.assertTemplateUsed(response, template)
 
     def test_urls_registered_user_template(self):
-        """URL-адрес использует соответствующий шаблон."""
+        """проверка шаблонов для авторизованного пользователя."""
 
         for address, template in self.registered_user_urls.items():
             with self.subTest(address=address):
