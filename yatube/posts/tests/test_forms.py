@@ -12,28 +12,20 @@ class PostCreateFormTests(TestCase):
     def setUpClass(cls):
         super().setUpClass()
 
-        cls.user = User.objects.create_user(username='testuser')
         cls.group = Group.objects.create(
             title='Тестовая группа',
             slug='test_slug',
             description='Тестовое описание'
         )
-        cls.post = Post.objects.create(
-            author=cls.user,
-            text='Отдельная запись',
-            group=cls.group
-        )
-
-        cls.form = PostForm()
 
     def setUp(self):
+        self.user = User.objects.create_user(username='testuser')
         self.authorized_client = Client()
         self.authorized_client.force_login(self.user)
 
     def test_create_post(self):
         """Создание записи посредством валидной формы"""
 
-        posts_count = Post.objects.count()
         form_data = {
             'group': self.group.id,
             'text': 'Тестовый текст',
@@ -45,7 +37,7 @@ class PostCreateFormTests(TestCase):
         )
         self.assertRedirects(response, reverse('posts:profile', kwargs={
             'username': 'testuser'}))
-        self.assertEqual(Post.objects.count(), posts_count + 1)
+        self.assertEqual(Post.objects.count(), 1)
         self.assertTrue(
             Post.objects.filter(
                 group=self.group,
@@ -57,6 +49,11 @@ class PostCreateFormTests(TestCase):
     def test_edit_post(self):
         """Проверка редактирования записи через форму"""
 
+        self.post = Post.objects.create(
+            author=self.user,
+            text='Отдельная запись',
+            group=self.group
+        )
         form_data = {
             'group': self.group.id,
             'text': 'Тестовый текст после правки',
