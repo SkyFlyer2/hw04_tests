@@ -1,3 +1,4 @@
+from xmlrpc.client import Boolean
 from django.contrib.auth import get_user_model
 from django.test import Client, TestCase
 from django.urls import reverse
@@ -25,18 +26,16 @@ class GroupPagesTests(TestCase):
             text='Отдельная запись',
             group=cls.group
         )
-        cls.group2 = Group.objects.create(
-            title='Тестовая группа 2',
-            slug='test_slug2',
-            description='Тестовое описание'
-        )
-        cls.post2 = Post.objects.create(
-            author=cls.user,
-            text='Отдельная запись',
-            group=cls.group2
-        )
 
-        cls.templates_pages_names = {
+    def setUp(self):
+        self.authorized_client = Client()
+        self.authorized_client.force_login(self.user)
+
+# Проверяем используемые шаблоны
+    def test_pages_uses_correct_template(self):
+        """URL-адрес использует соответствующий шаблон."""
+
+        self.templates_pages_names = {
             reverse('posts:index'): 'posts/index.html',
             reverse('posts:group_list', kwargs={
                 'slug': 'test_slug'}): 'posts/group_list.html',
@@ -48,14 +47,6 @@ class GroupPagesTests(TestCase):
                 'post_id': 1}): 'posts/create_post.html',
             reverse('posts:post_create'): 'posts/create_post.html'
         }
-
-    def setUp(self):
-        self.authorized_client = Client()
-        self.authorized_client.force_login(self.user)
-
-# Проверяем используемые шаблоны
-    def test_pages_uses_correct_template(self):
-        """URL-адрес использует соответствующий шаблон."""
 
         for reverse_name, template, in self.templates_pages_names.items():
             with self.subTest(reverse_name=reverse_name):
@@ -110,6 +101,8 @@ class GroupPagesTests(TestCase):
             with self.subTest(value=value):
                 form_field = response.context.get('form').fields.get(value)
                 self.assertIsInstance(form_field, expected)
+        self.assertIsInstance(response.context.get('is_edit'), Boolean)
+        self.assertTrue(response.context.get('is_edit'))
 
     def test_post_create_page_show_correct_context(self):
         """Шаблон post_create сформирован с правильным контекстом."""
@@ -129,6 +122,16 @@ class GroupPagesTests(TestCase):
     def test_post_on_main_page(self):
         """Проверяем что новая запись группы появилась на главной странице"""
 
+        self.group2 = Group.objects.create(
+            title='Тестовая группа 2',
+            slug='test_slug2',
+            description='Тестовое описание'
+        )
+        self.post2 = Post.objects.create(
+            author=self.user,
+            text='Отдельная запись',
+            group=self.group2
+        )
         response = self.authorized_client.get(reverse('posts:index'))
         first_object = response.context['page_obj'][0]
         self.assertEqual(first_object.text, 'Отдельная запись')
@@ -137,6 +140,16 @@ class GroupPagesTests(TestCase):
     def test_post_second_group_list_page(self):
         """Проверяем что новая запись группы появилась на странице группы"""
 
+        self.group2 = Group.objects.create(
+            title='Тестовая группа 2',
+            slug='test_slug2',
+            description='Тестовое описание'
+        )
+        self.post2 = Post.objects.create(
+            author=self.user,
+            text='Отдельная запись',
+            group=self.group2
+        )
         response = self.authorized_client.get(
             reverse('posts:group_list', kwargs={'slug': 'test_slug2'}))
         first_object = response.context['page_obj'][0]
@@ -147,6 +160,16 @@ class GroupPagesTests(TestCase):
         """Проверяем что новая запись группы появилась в профиле
            пользователя"""
 
+        self.group2 = Group.objects.create(
+            title='Тестовая группа 2',
+            slug='test_slug2',
+            description='Тестовое описание'
+        )
+        self.post2 = Post.objects.create(
+            author=self.user,
+            text='Отдельная запись',
+            group=self.group2
+        )
         response = self.authorized_client.get(
             reverse('posts:profile', kwargs={'username': 'testuser'}))
         first_object = response.context['page_obj'][0]
@@ -185,15 +208,24 @@ class PaginatorViewsTest(TestCase):
     def test_first_page_contains_ten_records(self):
         """ тестируем работу Paginator. Проверка вывода 10 записей"""
 
+        num_posts_on_first_page = 10
         for reverse_name in self.list_template_names:
             with self.subTest(reverse_name=reverse_name):
                 response = self.client.get(reverse_name)
-                self.assertEqual(len(response.context['page_obj']), 10)
+                self.assertEqual(
+                    len(response.context['page_obj']),
+                    num_posts_on_first_page
+                )
 
     def test_second_page_contains_three_records(self):
         """ тестируем работу Paginator. Проверка вывода оставшихся 3 записей"""
 
+        num_posts_on_second_page = 3
+
         for reverse_name in self.list_template_names:
             with self.subTest(reverse_name=reverse_name):
                 response = self.client.get(reverse_name + '?page=2')
-                self.assertEqual(len(response.context['page_obj']), 3)
+                self.assertEqual(
+                    len(response.context['page_obj']),
+                    num_posts_on_second_page
+                )

@@ -1,17 +1,9 @@
+from http import HTTPStatus
 from django.test import TestCase, Client
 from django.contrib.auth import get_user_model
 from posts.models import Post, Group
 
 User = get_user_model()
-
-
-class StaticURLTests(TestCase):
-    def setUp(self):
-        self.guest_client = Client()
-
-    def test_homepage(self):
-        response = self.guest_client.get('/')
-        self.assertEqual(response.status_code, 200)
 
 
 class PostURLTests(TestCase):
@@ -50,31 +42,31 @@ class PostURLTests(TestCase):
         """Страница / доступна любому пользователю."""
 
         response = self.guest_client.get('/')
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, HTTPStatus.OK)
 
     def test_post_group_slug_exists_at_desired_location(self):
         """Страница /group/<slug>/ доступна любому пользователю."""
 
         response = self.guest_client.get('/group/test_slug/')
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, HTTPStatus.OK)
 
     def test_post_profile_url_exists_at_desired_location(self):
         """Страница /profile/<username>/ доступна любому пользователю."""
 
         response = self.guest_client.get('/profile/testuser/')
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, HTTPStatus.OK)
 
     def test_posts_url_exists_at_desired_location(self):
         """Страница /posts/<post_id>/ доступна любому пользователю."""
 
         response = self.guest_client.get('/posts/1/')
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, HTTPStatus.OK)
 
     def test_unexisting_page_url_exists_at_desired_location(self):
         """Несуществующая страница - код 404."""
 
         response = self.guest_client.get('/unexisting_page/')
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, HTTPStatus.NOT_FOUND)
 
 # Серия тестов для авторизованного пользователя
     def test_post_edit_url_exists_at_desired_location(self):
