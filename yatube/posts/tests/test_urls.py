@@ -59,7 +59,8 @@ class PostURLTests(TestCase):
     def test_posts_url_exists_at_desired_location(self):
         """Страница /posts/<post_id>/ доступна любому пользователю."""
 
-        response = self.guest_client.get('/posts/1/')
+        post_id = 1
+        response = self.guest_client.get(f'/posts/{post_id}/')
         self.assertEqual(response.status_code, HTTPStatus.OK)
 
     def test_unexisting_page_url_exists_at_desired_location(self):
@@ -72,8 +73,11 @@ class PostURLTests(TestCase):
     def test_post_edit_url_exists_at_desired_location(self):
         """Страница /posts/<post_id>/edit доступна только автору."""
 
-        response = self.guest_client.get('/posts/1/edit/', follow=True)
-        self.assertRedirects(response, '/auth/login/?next=/posts/1/edit/')
+        post_id = 1
+        url_edit = f'/posts/{post_id}/edit/'
+        url_login = f'/auth/login/?next={url_edit}'
+        response = self.guest_client.get(url_edit, follow=True)
+        self.assertRedirects(response, url_login)
 
     def test_post_create_url_exists_at_desired_location(self):
         """Страница /create/ доступна авторизованному пользователю."""
