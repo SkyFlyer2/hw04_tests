@@ -101,7 +101,7 @@ class GroupPagesTests(TestCase):
                 form_field = response.context.get('form').fields.get(value)
                 self.assertIsInstance(form_field, expected)
         #self.assertIsInstance(response.context.get('form', PostForm'))
-        print(response.context.get('form'))
+#        print(response.context.get('form'))
         self.assertIsInstance(response.context.get('is_edit'), bool)
         self.assertTrue(response.context.get('is_edit'))
 
@@ -191,13 +191,16 @@ class PaginatorViewsTest(TestCase):
         )
 
     # создаём 13 тестовых записей.
+        list_posts = []
         for i in range(1, 14):
-            Post.objects.create(
-                author=cls.user,
-                text=f'Текст для проверки {i}',
-                group=cls.group,
-                pub_date='12.06.2022'
+            list_posts.append(
+                Post(
+                    text=f'Текст для проверки {i}',
+                    author=cls.user,
+                    group=cls.group,
+                )
             )
+        Post.objects.bulk_create(list_posts)
 
         # список шаблонов для проверки работы paginator
         cls.list_template_names = {
