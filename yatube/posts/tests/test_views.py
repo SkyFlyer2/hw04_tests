@@ -1,4 +1,3 @@
-from xmlrpc.client import Boolean
 from django.contrib.auth import get_user_model
 from django.test import Client, TestCase
 from django.urls import reverse
@@ -101,7 +100,9 @@ class GroupPagesTests(TestCase):
             with self.subTest(value=value):
                 form_field = response.context.get('form').fields.get(value)
                 self.assertIsInstance(form_field, expected)
-        self.assertIsInstance(response.context.get('is_edit'), Boolean)
+        #self.assertIsInstance(response.context.get('form', PostForm'))
+        print(response.context.get('form'))
+        self.assertIsInstance(response.context.get('is_edit'), bool)
         self.assertTrue(response.context.get('is_edit'))
 
     def test_post_create_page_show_correct_context(self):
