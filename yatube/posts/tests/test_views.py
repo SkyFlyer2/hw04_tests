@@ -2,7 +2,7 @@ from django.contrib.auth import get_user_model
 from django.test import Client, TestCase
 from django.urls import reverse
 from django import forms
-
+from posts.forms import PostForm
 from posts.models import Post, Group
 
 User = get_user_model()
@@ -100,8 +100,7 @@ class GroupPagesTests(TestCase):
             with self.subTest(value=value):
                 form_field = response.context.get('form').fields.get(value)
                 self.assertIsInstance(form_field, expected)
-        #self.assertIsInstance(response.context.get('form', PostForm'))
-#        print(response.context.get('form'))
+        self.assertIsInstance(response.context.get('form'), PostForm)
         self.assertIsInstance(response.context.get('is_edit'), bool)
         self.assertTrue(response.context.get('is_edit'))
 
@@ -118,6 +117,7 @@ class GroupPagesTests(TestCase):
             with self.subTest(value=value):
                 form_field = response.context.get('form').fields.get(value)
                 self.assertIsInstance(form_field, expected)
+        self.assertIsInstance(response.context.get('form'), PostForm)
 
 # дополнительная проверка при создании поста
     def test_post_on_main_page(self):

@@ -1,4 +1,3 @@
-from posts.forms import PostForm
 from posts.models import Post, Group
 from django.test import Client, TestCase
 from django.urls import reverse
