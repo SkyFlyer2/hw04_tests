@@ -22,16 +22,16 @@ class PostURLTests(TestCase):
             text='Тестовый текст, который не должен быть слишком коротким',
             group=cls.group
         )
-        cls.guest_user_urls = {
-            '/': 'posts/index.html',
-            '/group/test_slug/': 'posts/group_list.html',
-            '/profile/testuser/': 'posts/profile.html',
-            '/posts/1/': 'posts/post_detail.html',
-        }
-        cls.registered_user_urls = {
-            '/create/': 'posts/create_post.html',
-            '/posts/1/edit/': 'posts/create_post.html'
-        }
+        cls.guest_user_urls = (
+            ('/', 'posts/index.html'),
+            ('/group/test_slug/', 'posts/group_list.html'),
+            ('/profile/testuser/', 'posts/profile.html'),
+            ('/posts/1/', 'posts/post_detail.html'),
+        )
+        cls.registered_user_urls = (
+            ('/create/', 'posts/create_post.html'),
+            ('/posts/1/edit/', 'posts/create_post.html'),
+        )
 
     def setUp(self):
         self.guest_client = Client()
@@ -91,15 +91,15 @@ class PostURLTests(TestCase):
     def test_urls_guest_user_template(self):
         """проверка шаблонов для гостя."""
 
-        for address, template in self.guest_user_urls.items():
-            with self.subTest(address=address):
-                response = self.guest_client.get(address)
+        for url, template in self.guest_user_urls:
+            with self.subTest(url=url):
+                response = self.guest_client.get(url)
                 self.assertTemplateUsed(response, template)
 
     def test_urls_registered_user_template(self):
         """проверка шаблонов для авторизованного пользователя."""
 
-        for address, template in self.registered_user_urls.items():
-            with self.subTest(address=address):
-                response = self.authorized_client.get(address)
+        for url, template in self.registered_user_urls:
+            with self.subTest(url=url):
+                response = self.authorized_client.get(url)
                 self.assertTemplateUsed(response, template)
