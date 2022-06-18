@@ -25,7 +25,6 @@ class PostCreateFormTests(TestCase):
 
     def test_create_post(self):
         """Создание записи посредством валидной формы"""
-
         form_data = {
             'group': self.group.id,
             'text': 'Тестовый текст',
@@ -35,7 +34,6 @@ class PostCreateFormTests(TestCase):
             data=form_data,
             follow=True
         )
-
         self.assertRedirects(response, reverse('posts:profile', kwargs={
             'username': 'testuser'}))
         self.assertEqual(Post.objects.count(), 1)
@@ -69,12 +67,6 @@ class PostCreateFormTests(TestCase):
             data=form_data,
             follow=True
         )
-        response_guest = self.guest_client.post(
-            reverse('posts:post_edit', kwargs={
-                'post_id': self.post.id}),
-            data=form_data,
-            follow=True
-        )
         self.assertRedirects(response, reverse('posts:post_detail', kwargs={
             'post_id': self.post.id}))
         self.assertTrue(
@@ -83,6 +75,12 @@ class PostCreateFormTests(TestCase):
                 author=self.user,
                 text='Тестовый текст после правки'
             ).exists()
+        )
+        response_guest = self.guest_client.post(
+            reverse('posts:post_edit', kwargs={
+                'post_id': self.post.id}),
+            data=form_data,
+            follow=True
         )
         self.assertRedirects(
             response_guest, f'/auth/login/?next=/posts/{self.post.id}/edit/')

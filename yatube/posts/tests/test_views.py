@@ -92,11 +92,11 @@ class GroupPagesTests(TestCase):
         response = self.authorized_client.get(
             reverse('posts:post_edit', kwargs={'post_id': 1}))
         # Словарь ожидаемых типов полей формы:
-        form_fields = {
-            'text': forms.fields.CharField,
-            'group': forms.fields.ChoiceField,
-        }
-        for value, expected in form_fields.items():
+        form_fields = (
+            ('text', forms.fields.CharField),
+            ('group', forms.fields.ChoiceField),
+        )
+        for value, expected in form_fields:
             with self.subTest(value=value):
                 form_field = response.context.get('form').fields.get(value)
                 self.assertIsInstance(form_field, expected)
@@ -191,18 +191,14 @@ class PaginatorViewsTest(TestCase):
         )
 
     # создаём 13 тестовых записей.
-        list_posts = []
-        for i in range(1, 14):
-            list_posts.append(
-                Post(
-                    text=f'Текст для проверки {i}',
-                    author=cls.user,
-                    group=cls.group,
-                )
-            )
+        list_posts = [Post(
+            text=f'Текст для проверки {i}',
+            author=cls.user,
+            group=cls.group,
+        ) for i in range(13)]
         Post.objects.bulk_create(list_posts)
 
-        # список шаблонов для проверки работы paginator
+    # список шаблонов для проверки работы paginator
         cls.list_template_names = {
             reverse('posts:index'),
             reverse('posts:group_list', kwargs={'slug': 'test_slug'}),
