@@ -19,6 +19,7 @@ class PostCreateFormTests(TestCase):
 
     def setUp(self):
         self.user = User.objects.create_user(username='testuser')
+        self.guest_client = Client()
         self.authorized_client = Client()
         self.authorized_client.force_login(self.user)
 
@@ -34,20 +35,25 @@ class PostCreateFormTests(TestCase):
             data=form_data,
             follow=True
         )
+
         self.assertRedirects(response, reverse('posts:profile', kwargs={
             'username': 'testuser'}))
         self.assertEqual(Post.objects.count(), 1)
-        self.assertTrue(
-            Post.objects.filter(
-                group=self.group,
-                author=self.user,
-                text='Тестовый текст'
-            ).exists()
+        self.assertTrue(Post.objects.filter(group=self.group).exists())
+        self.assertTrue(Post.objects.filter(author=self.user).exists())
+        self.assertTrue(Post.objects.filter(text='Тестовый текст').exists())
+
+# проверим ответ для гостя
+        response_guest = self.guest_client.post(
+            reverse('posts:post_create'),
+            data=form_data,
+            follow=True
         )
+        self.assertRedirects(
+            response_guest, '/auth/login/?next=/create/')
 
     def test_edit_post(self):
         """Проверка редактирования записи через форму"""
-
         self.post = Post.objects.create(
             author=self.user,
             text='Отдельная запись',
@@ -63,6 +69,12 @@ class PostCreateFormTests(TestCase):
             data=form_data,
             follow=True
         )
+        response_guest = self.guest_client.post(
+            reverse('posts:post_edit', kwargs={
+                'post_id': self.post.id}),
+            data=form_data,
+            follow=True
+        )
         self.assertRedirects(response, reverse('posts:post_detail', kwargs={
             'post_id': self.post.id}))
         self.assertTrue(
@@ -72,3 +84,5 @@ class PostCreateFormTests(TestCase):
                 text='Тестовый текст после правки'
             ).exists()
         )
+        self.assertRedirects(
+            response_guest, f'/auth/login/?next=/posts/{self.post.id}/edit/')
