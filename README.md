@@ -1,3 +1,11 @@
 # hw04_tests
 
-[![CI](https://github.com/yandex-praktikum/hw04_tests/actions/workflows/python-app.yml/badge.svg?branch=master)](https://github.com/yandex-praktikum/hw04_tests/actions/workflows/python-app.yml)
+Проект покрытия тестами модулей YaTube
+
+Были разработаны тесты для следующих компонентов:
+
+Models
+Views
+Posts
+Urls
+Forms
